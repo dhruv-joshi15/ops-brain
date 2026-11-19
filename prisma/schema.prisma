@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client"
+  output = "../generated/prisma"
+}
+datasource db {
+  provider = "sqlite"
+}
+model Task {
+  id String @id
+  data Json
+}
+model Run {
+  id String @id
+  createdAt DateTime @default(now())
+  state String
+  data Json
+}
+model RuleVersion {
+  version Int @id @default(autoincrement())
+  data Json
+}
+model Catalog {
+  id String @id
+  data Json
+}
+model AuditEvent {
+  id String @id
+  data Json
+}

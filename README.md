@@ -36,6 +36,12 @@ The sample assumes a November 19, 2026 workspace date. Set `OPS_DEMO_DATE=2026-1
 | Dependencies | Interactive graph and hypothetical forecasts with downstream impact and draft Slack follow-ups |
 | Activity and settings | Searchable extraction and change history, scoped demo cleanup, versioned extraction and ranking rules, and Midnight and Light themes |
 
+## Deploy the assessment demo to Vercel
+
+Import this repository with the Next.js preset and use the default build command. The API initializes its SQLite schema in Vercel’s writable temporary directory on first use. No setup command or database variable is required on Vercel.
+
+The hosted workspace is a shared, temporary demo. Changes can disappear when Vercel recycles an instance or serves a request from another instance. Use synthetic notes on the public demo. Run locally with SQLite for persistent assessment data.
+
 ## Extraction modes
 
 - **Synthetic sample.** Deterministic local extraction for the built-in meeting. Pasted custom notes require a configured provider.

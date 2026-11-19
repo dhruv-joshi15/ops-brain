@@ -4,7 +4,7 @@ import {dateSchema, defaultRules, rulesSchema, taskSchema, validateGraph,type Ta
 import type {Run} from "../../../lib/contracts";
 import {extract} from "../../../lib/extract";
 import {manage,managementCommands,ReviewError,type ManagementCommand} from "../../../lib/manage";
-import {db, readRecords, workspace} from "../../../lib/store";
+import {db, hostedDemo, initializeHostedDatabase, readRecords, workspace} from "../../../lib/store";
 
 const meetingKey = (notes:string,date:string) => createHash("sha256")
   .update(JSON.stringify([date,notes.normalize("NFC").trim().replace(/\s+/gu," ")]))
@@ -18,9 +18,11 @@ const commandSchema = z.discriminatedUnion("action",[
 ]);
 export async function GET() {
   try {
+    await initializeHostedDatabase();
     return Response.json(await workspace());
-  } catch {
-    return Response.json({error:"The workspace database is unavailable. Run npm run setup and restart the app."},{status:503});
+  } catch (error) {
+    console.error("Ops workspace initialization failed",error instanceof Error ? error.name : "Unknown error");
+    return Response.json({error:hostedDemo?"The hosted demo database is unavailable. Please retry.":"The workspace database is unavailable. Run npm run setup and restart the app."},{status:503});
   }
 }
 
@@ -31,6 +33,7 @@ export async function POST(request:Request) {
   if (!parsed.success) return Response.json({error:"Some fields are invalid. Check required values, dates and lengths."},{status:400});
   const command = parsed.data;
   try {
+    await initializeHostedDatabase();
     if (command.action!=="extract"&&command.action!=="commit"&&command.action!=="rules"&&command.action!=="restore")
       await db.$transaction(tx=>manage(tx,command satisfies ManagementCommand,Boolean(process.env.OPENAI_API_KEY)));
     if (command.action==="rules") await db.ruleVersion.create({data:{data:command.rules}});
